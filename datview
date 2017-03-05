@@ -4,15 +4,14 @@ from PIL import Image
 IMAGE_SIZE=224
 
 import sys
-if len(sys.argv) == 1:
-    exit()
-fd = open(sys.argv[1], "r")
-buf = fd.read(IMAGE_SIZE*IMAGE_SIZE*2)
-arr = np.fromstring(buf, dtype=np.uint8).reshape([IMAGE_SIZE, IMAGE_SIZE, 2])
-z = np.zeros([IMAGE_SIZE, IMAGE_SIZE, 1], np.uint8)
-arr = np.append(arr, z, 2)
-img = Image.fromarray(arr, 'RGB')
-img.show()
-#print (arr)
+for f in sys.argv[1:]:
+    fd = open(f, "r")
+    buf = fd.read(IMAGE_SIZE*IMAGE_SIZE*2)
+    arr = np.fromstring(buf, dtype=np.uint8).reshape([IMAGE_SIZE, IMAGE_SIZE, 2])
+    z = np.zeros([IMAGE_SIZE, IMAGE_SIZE, 1], np.uint8)
+    arr = np.append(arr, z, 2)
+    img = Image.fromarray(arr, 'RGB')
+    img.show()
+
      
 

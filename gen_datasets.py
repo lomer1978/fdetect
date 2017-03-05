@@ -62,7 +62,7 @@ def rnd_move(img, lbl):
 def standardize(img):
     mean = np.mean(img)
     stddev = max(np.std(img), 1.0/np.sqrt(img.size))
-    newimg = img-mean/stddev
+    newimg = (img-mean)/stddev
     return newimg
     
     
@@ -96,7 +96,6 @@ def maybe_convert_dataset(srcpath, dstpath):
             aplfile = f.replace("AP_Image.jpg", "AP_Markings.txt")
             ltlfile = f.replace("AP_Image.jpg", "LT_Markings.txt")
             (newimage, apsize, ltsize) = normalize_images(apfile, ltfile)
-            newimage = standardize(newimage)
             
             newaplbl = normalize_label(aplfile, apsize)
             newltlbl = normalize_label(ltlfile, ltsize)
@@ -114,7 +113,7 @@ def maybe_convert_dataset(srcpath, dstpath):
                 (augimage, auglabel) = rnd_brightness(augimage, auglabel)
                 (augimage, auglabel) = rnd_contrast(augimage, auglabel)
                 (augimage, auglabel) = rnd_move(augimage, auglabel)
-                augimage = standardize(augimage)
+                augimage = np.uint8(augimage)
                 
                 fd = open(f.replace(srcpath, dstpath).replace("AP_Image.jpg", "Image-"+str(i)+".dat"), "wb")
                 fd.write(augimage)
