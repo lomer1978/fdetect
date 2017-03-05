@@ -2,12 +2,14 @@ import glob
 import PIL
 from PIL import Image
 import numpy as np
+from scipy.ndimage.interpolation import shift
 import sys
 import os
 import random
 import string
 
 IMAGE_SIZE=224
+
 def normalize_images(file1, file2):
     dstsize = [IMAGE_SIZE, IMAGE_SIZE]
     img1 = Image.open(file1)
@@ -31,6 +33,38 @@ def rnd_flip(img, lbl):
         newimg = img
                 
     return (newimg, newlbl)
+
+def rnd_contrast(img, lbl):
+    newlbl = lbl
+    mean=np.mean(img)
+    contrast = random.uniform(0.2, 0.8)
+    newimg = ((img - mean)*contrast + mean).clip(0, 255)
+    return  (newimg, newlbl)
+
+def rnd_brightness(img, lbl):
+    newlbl = lbl
+    brightness=random.randint(0, 63)
+    newimg = (img+brightness).clip(0, 255)
+    return (newimg, newlbl)
+
+def rnd_move(img, lbl):
+    newlbl = lbl
+    dx = random.randint(-7, 7)
+    dy = random.randint(-7, 7)
+    newimg = shift(img, [dx, dy, 0])
+    for i in range(0, len(lbl), 4):
+        if lbl[i] != 0 and lbl[i+1] != 0:
+            newlbl[i] = newlbl[i]+dx
+            newlbl[i+1] = newlbl[i+1]+dy
+        
+    return (newimg, newlbl)
+
+def standardize(img):
+    mean = np.mean(img)
+    stddev = max(np.std(img), 1.0/np.sqrt(img.size))
+    newimg = img-mean/stddev
+    return newimg
+    
     
 def normalize_label(file, size):
     s=[]
@@ -44,7 +78,7 @@ def normalize_label(file, size):
     fd.close()
     return s
 
-AUG_PER_SAMPLE=3
+AUG_PER_SAMPLE=10
 
 def flist2str(flist):
     return string.join([str(f) for f in flist])
@@ -62,6 +96,7 @@ def maybe_convert_dataset(srcpath, dstpath):
             aplfile = f.replace("AP_Image.jpg", "AP_Markings.txt")
             ltlfile = f.replace("AP_Image.jpg", "LT_Markings.txt")
             (newimage, apsize, ltsize) = normalize_images(apfile, ltfile)
+            newimage = standardize(newimage)
             
             newaplbl = normalize_label(aplfile, apsize)
             newltlbl = normalize_label(ltlfile, ltsize)
@@ -76,6 +111,11 @@ def maybe_convert_dataset(srcpath, dstpath):
 
             for i in range(AUG_PER_SAMPLE):
                 (augimage, auglabel) = rnd_flip(newimage, newaplbl + newltlbl)
+                (augimage, auglabel) = rnd_brightness(augimage, auglabel)
+                (augimage, auglabel) = rnd_contrast(augimage, auglabel)
+                (augimage, auglabel) = rnd_move(augimage, auglabel)
+                augimage = standardize(augimage)
+                
                 fd = open(f.replace(srcpath, dstpath).replace("AP_Image.jpg", "Image-"+str(i)+".dat"), "wb")
                 fd.write(augimage)
                 fd.close()
