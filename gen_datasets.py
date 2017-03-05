@@ -54,8 +54,8 @@ def rnd_move(img, lbl):
     newimg = shift(img, [dx, dy, 0])
     for i in range(0, len(lbl), 4):
         if lbl[i] != 0 and lbl[i+1] != 0:
-            newlbl[i] = newlbl[i]+dx
-            newlbl[i+1] = newlbl[i+1]+dy
+            newlbl[i] = newlbl[i]+(dx/IMAGE_SIZE)
+            newlbl[i+1] = newlbl[i+1]+(dy/IMAGE_SIZE)
         
     return (newimg, newlbl)
 
