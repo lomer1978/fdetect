@@ -51,11 +51,11 @@ def rnd_move(img, lbl):
     newlbl = lbl
     dx = random.randint(-7, 7)
     dy = random.randint(-7, 7)
-    newimg = shift(img, [dx, dy, 0])
+    newimg = shift(img, [dy, dx, 0])
     for i in range(0, len(lbl), 4):
         if lbl[i] != 0 and lbl[i+1] != 0:
-            newlbl[i] = newlbl[i]+(dx/IMAGE_SIZE)
-            newlbl[i+1] = newlbl[i+1]+(dy/IMAGE_SIZE)
+            newlbl[i] = newlbl[i]+(float(dx)/IMAGE_SIZE)
+            newlbl[i+1] = newlbl[i+1]+(float(dy)/IMAGE_SIZE)
         
     return (newimg, newlbl)
 
@@ -78,7 +78,7 @@ def normalize_label(file, size):
     fd.close()
     return s
 
-AUG_PER_SAMPLE=10
+AUG_PER_SAMPLE=100
 
 def flist2str(flist):
     return string.join([str(f) for f in flist])
